@@ -3,6 +3,9 @@ import xml.etree.ElementTree as ET
 from argparse import ArgumentParser
 import re
 
+import easygui
+import requests
+
 def html_to_xml(html_content: str):
     """
     Use trafilatura to extract xml content from html and return it as XML format.
@@ -121,8 +124,7 @@ def code_html_to_markdown(html_content: str):
     markdown_content = post_processing(markdown_content)
     return markdown_content
 
-
-if __name__ == "__main__":
+def code_html_to_markdown_CLI():
     parser = ArgumentParser()
     parser.add_argument("--input", type=str, default="demo.html", help="Input html file path")
     parser.add_argument("--output", type=str, default="demo.md", help="Output markdown file path")
@@ -135,3 +137,22 @@ if __name__ == "__main__":
     
     with open(args.output, 'w') as f:
         f.write(markdown_content)
+
+def code_html_to_markdown_GUI(url: str):
+    try:
+        page = requests.get(url)
+        if page.status_code != 200:
+            print(f"Failed to retrieve the html url at {url}. Status code: {page.status_code}")
+            return
+        
+        markdown_content = code_html_to_markdown(page.text)
+        
+        return markdown_content
+        
+    except Exception as e:
+        print(e)
+        
+if __name__ == "__main__":
+    url = easygui.enterbox("Enter the URL of the blog or some available code html:").strip()
+    content = code_html_to_markdown_GUI(url)
+    easygui.msgbox(content)
